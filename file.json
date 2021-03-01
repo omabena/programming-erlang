@@ -1,0 +1,8 @@
+{
+    "errors": {
+        "detail": {
+            "code": "insufficient_funds",
+            "message": "source has insufficient funds"
+        }
+    }
+}
