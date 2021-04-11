@@ -4,7 +4,12 @@
          odds_and_even/1,
          perms/1,
          pythag/1,
-         qsort/1]).
+         qsort/1,
+         sleep/1,
+         flush_buffer/0,
+         priority_receive/0,
+         on_exit/2,
+         keep_alive/2]).
 
 for(Max, Max, F) -> [F(Max)];
 for(I, Max, F) -> [F(I) | for(I + 1, Max, F)].
@@ -32,3 +37,36 @@ odds_and_evens_acc([H | T], Odds, Evens) ->
     end;
 odds_and_evens_acc([], Odds, Evens) ->
     {lists:reverse(Odds), lists:reverse(Evens)}.
+
+sleep(T) -> receive  after T -> true end.
+
+flush_buffer() ->
+    receive
+        _Any -> flush_buffer()
+    after 0 ->
+        true
+    end.
+        
+priority_receive() ->
+    receive 
+        {alarm, X} ->
+            {alarm, X}
+    after 0 ->
+        receive
+            Any -> Any
+        end
+    end.
+
+
+on_exit(Pid, Fun) ->
+    spawn(fun() ->
+        Ref = monitor(process, Pid),
+        receive
+            {'DOWN', Ref, process, Pid, Why} ->
+                Fun(Why)
+            end
+        end).
+
+keep_alive(Name, Fun) ->
+    register(Name, Pid = spawn(Fun)),
+    on_exit(Pid, fun(_Why)  -> keep_alive(Name, Fun) end).
