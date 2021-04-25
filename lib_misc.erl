@@ -13,6 +13,7 @@
          pythag/1,
          qsort/1,
          sleep/1,
+         string2value/1,
          unconsult/2]).
 
 for(Max, Max, F) -> [F(Max)];
@@ -98,3 +99,10 @@ ls(Dir) ->
     {ok, L} = file:list_dir(Dir),
     lists:map(fun (I) -> {I, file_size_and_type(I)} end,
               lists:sort(L)).
+
+string2value(Str) ->
+    {ok, Tokens, _} = erl_scan:string(Str ++ "."),
+    {ok, Exprs} = erl_parse:parse_exprs(Tokens),
+    Bindings = erl_eval:new_bindings(),
+    {value, Value, _} = erl_eval:exprs(Exprs, Bindings),
+    Value.
